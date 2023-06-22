@@ -1,5 +1,9 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const exphbs = require('express-handlebars');
+const http = require('http').createServer(app);
+const io = require('socket.io')(http);
+
 const app = express();
 const PORT = 8080;
 
@@ -8,6 +12,10 @@ const productManager = new ProductManager('productos.json');
 
 app.use(bodyParser.json());
 app.use(express.json());
+
+// Configuración de Handlebars
+app.engine('handlebars', exphbs());
+app.set('view engine', 'handlebars');
 
 // Ruta raíz para listar todos los productos
 app.get('/api/products', (req, res) => {
@@ -19,7 +27,7 @@ app.get('/api/products', (req, res) => {
 app.get('/api/products/:pid', (req, res) => {
   const productId = parseInt(req.params.pid);
   const product = productManager.getProductById(productId);
-  
+
   if (product) {
     res.json(product);
   } else {
@@ -32,7 +40,7 @@ app.put('/api/products/:pid', (req, res) => {
   const productId = parseInt(req.params.pid);
   const updatedProduct = req.body;
   const product = productManager.updateProduct(productId, updatedProduct);
-  
+
   if (product) {
     res.json(product);
   } else {
@@ -44,7 +52,7 @@ app.put('/api/products/:pid', (req, res) => {
 app.delete('/api/products/:pid', (req, res) => {
   const productId = parseInt(req.params.pid);
   const product = productManager.deleteProduct(productId);
-  
+
   if (product) {
     res.json(product);
   } else {
@@ -66,7 +74,13 @@ app.post('/api/products', (req, res) => {
   res.status(201).json(product);
 });
 
+// Configurar el evento de conexión del socket
+io.on('connection', (socket) => {
+  console.log('Un cliente se ha conectado');
+
+});
+
 // Iniciar el servidor
-app.listen(PORT, () => {
+http.listen(PORT, () => {
   console.log(`Servidor escuchando en el puerto ${PORT}`);
 });
