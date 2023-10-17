@@ -33,6 +33,9 @@ app.use(express.json());
 app.engine('handlebars', exphbs());
 app.set('view engine', 'handlebars');
 
+// Ruta para acceder a la documentación de Swagger
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
 // Ruta raíz para listar todos los productos
 app.get('/api/products', async (req, res) => {
   try {
